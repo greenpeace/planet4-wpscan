@@ -1,0 +1,50 @@
+---
+version: 2.1
+
+docker_auth: &docker_auth
+  username: $DOCKERHUB_USERNAME
+  password: $DOCKERHUB_PASSWORD
+
+defaults: &defaults
+  docker:
+    - image: greenpeaceinternational/circleci-base:latest
+      auth:
+        <<: *docker_auth
+
+orbs:
+  slack: circleci/slack@3.4.2
+
+jobs:
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: lint
+          command: make lint
+
+  check-api:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Check WPScan API
+          command: ./bin/scan.py
+
+workflows:
+  branch:
+    jobs:
+      - lint
+
+  cron-api:
+    triggers:
+      - schedule:
+          # Weekly 1000UTC Monday
+          cron: "0 10 * * 1"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - check-api:
+          context: org-global
