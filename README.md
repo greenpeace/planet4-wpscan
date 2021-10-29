@@ -1,6 +1,9 @@
-# Greenpeace Planet 4
+# Greenpeace Planet 4 vulnerabilities scan
 
 ![Planet4](./planet4.png)
+
+Using [WPScan](https://wpscan.com/profile) to scan Wordpress plugins used in P4 for
+vulnerabilities and reporting them in Slack.
 
 ## Contribute
 
