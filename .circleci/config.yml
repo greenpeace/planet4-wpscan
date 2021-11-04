@@ -29,7 +29,17 @@ jobs:
       - checkout
       - run:
           name: Check WPScan API
-          command: ./bin/scan.py
+          command: |
+            scan="$(./bin/scan.py)"
+            echo "export SCAN=\"${scan}\"" >> $BASH_ENV
+            cat "$BASH_ENV"
+      - slack/notify:
+          channel: C02FB4CQWLF
+          color: '#cb0e0e'
+          message: "${SCAN}"
+          include_job_number_field: false
+          include_project_field: false
+          include_visit_job_action: false
 
 workflows:
   branch:
