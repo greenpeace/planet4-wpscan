@@ -38,5 +38,5 @@ if __name__ == '__main__':
             slug = package.split('/')[1]
             version = requirements[package]
             if '*' in version:
-                version=version.replace('*', '999')
+                version = version.replace('*', '999')
             plugin_check(slug, version)

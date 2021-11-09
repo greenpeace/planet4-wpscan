@@ -21,7 +21,7 @@ jobs:
       - checkout
       - run:
           name: lint
-          command: make lint
+          command: flake8
 
   check-api:
     <<: *defaults
