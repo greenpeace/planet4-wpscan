@@ -37,4 +37,6 @@ if __name__ == '__main__':
         if 'wpackagist' in package:
             slug = package.split('/')[1]
             version = requirements[package]
+            if '*' in version:
+                version=version.replace('*', '999')
             plugin_check(slug, version)
