@@ -2,6 +2,7 @@
 import json
 import os
 import requests
+import sys
 
 COMPOSER_FILE = 'https://raw.githubusercontent.com/greenpeace/planet4-base/main/composer.json'
 WPSCAN_API = 'https://wpscan.com/api/v3/plugins/'
@@ -20,7 +21,7 @@ def plugin_check(slug, version):
         return False
     for v in vulnerabilities:
         if (v['fixed_in'] > version):
-            print('Vulnerability affecting {0}: {1} - {2}{3}'.format(
+            return('Vulnerability affecting {0}: {1} - {2}{3}'.format(
                 slug,
                 v['title'],
                 WPSCAN_URL,
@@ -33,10 +34,16 @@ if __name__ == '__main__':
     composer = json.loads(r.content)
     requirements = composer['require']
 
+    output = ''
     for package in requirements:
         if 'wpackagist' in package:
             slug = package.split('/')[1]
             version = requirements[package]
             if '*' in version:
                 version = version.replace('*', '999')
-            plugin_check(slug, version)
+            output+=plugin_check(slug, version)
+
+    if not output:
+        sys.exit('No active vulnerability found')
+
+    print(output)
