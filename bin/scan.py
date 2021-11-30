@@ -19,6 +19,7 @@ def plugin_check(slug, version):
         vulnerabilities = r.json()[slug]['vulnerabilities']
     except KeyError:
         return False
+
     for v in vulnerabilities:
         if (v['fixed_in'] > version):
             return('Vulnerability affecting {0}: {1} - {2}{3}'.format(
@@ -27,6 +28,8 @@ def plugin_check(slug, version):
                 WPSCAN_URL,
                 v['id'])
             )
+
+    return False
 
 
 if __name__ == '__main__':
@@ -41,7 +44,9 @@ if __name__ == '__main__':
             version = requirements[package]
             if '*' in version:
                 version = version.replace('*', '999')
-            output+=plugin_check(slug, version)
+            vulns = plugin_check(slug, version)
+            if vulns:
+                output += vulns
 
     if not output:
         sys.exit('No active vulnerability found')
