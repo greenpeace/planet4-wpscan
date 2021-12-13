@@ -2,7 +2,6 @@
 import json
 import os
 import requests
-import sys
 
 COMPOSER_FILE = 'https://raw.githubusercontent.com/greenpeace/planet4-base/main/composer.json'
 WPSCAN_API = 'https://wpscan.com/api/v3/plugins/'
