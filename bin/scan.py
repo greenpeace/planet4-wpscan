@@ -49,6 +49,6 @@ if __name__ == '__main__':
                 output += vulns
 
     if not output:
-        sys.exit('No active vulnerability found')
+        output = 'No active vulnerability found'
 
     print(output)
