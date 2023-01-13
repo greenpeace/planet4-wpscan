@@ -48,12 +48,16 @@ def wp_check(version):
         if item == wp_major:
             vulnerabilities = value['vulnerabilities']
             for v in vulnerabilities:
-                if (v['fixed_in'] > version):
-                    output += 'Vulnerability affecting {0}: {1} - {2}{3}'.format(
-                        slug,
-                        v['title'],
-                        WPSCAN_URL,
-                        v['id'])
+                try:
+                    if (v['fixed_in'] <= version):
+                        continue
+                except TypeError:
+                    continue
+                output += 'Vulnerability affecting {0}: {1} - {2}{3}'.format(
+                    slug,
+                    v['title'],
+                    WPSCAN_URL,
+                    v['id'])
 
     return output
 
