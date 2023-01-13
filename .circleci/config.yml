@@ -23,20 +23,39 @@ jobs:
           name: lint
           command: flake8
 
-  check-api:
+  check-wpscan:
     <<: *defaults
     steps:
       - checkout
       - run:
           name: Check WPScan API
           command: |
-            scan="$(./bin/scan.py)"
-            echo "export SCAN=\"${scan}\"" >> $BASH_ENV
+            output="$(./bin/scan.py --function wpscan)"
+            echo "export OUTPUT=\"${output}\"" >> $BASH_ENV
             cat "$BASH_ENV"
       - slack/notify:
           channel: C02FB4CQWLF
           color: '#cb0e0e'
-          message: "${SCAN}"
+          message: "${OUTPUT}"
+          include_job_number_field: false
+          include_project_field: false
+          include_visit_job_action: false
+
+  check-composer:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Check composer updates
+          command: |
+            sudo mkdir -p /app/source/artifacts
+            output="$(./bin/scan.py --function composer)"
+            echo "export OUTPUT=\"${output}\"" >> $BASH_ENV
+            cat "$BASH_ENV"
+      - slack/notify:
+          channel: C02FB4CQWLF
+          color: '#cb0e0e'
+          message: "${OUTPUT}"
           include_job_number_field: false
           include_project_field: false
           include_visit_job_action: false
@@ -46,7 +65,7 @@ workflows:
     jobs:
       - lint
 
-  cron-api:
+  cron-check:
     triggers:
       - schedule:
           # Weekly 1000UTC Monday
@@ -56,5 +75,7 @@ workflows:
               only:
                 - main
     jobs:
-      - check-api:
+      - check-wpscan:
+          context: org-global
+      - check-composer:
           context: org-global

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+import argparse
 import json
 import os
 import requests
+import subprocess
 
 COMPOSER_FILE = 'https://raw.githubusercontent.com/greenpeace/planet4-base/main/composer.json'
 WPSCAN_PLAUGINS_API = 'https://wpscan.com/api/v3/plugins/'
@@ -52,9 +54,8 @@ def wp_check(version):
                     if (v['fixed_in'] <= version):
                         continue
                 except TypeError:
-                    continue
-                output += 'Vulnerability affecting {0}: {1} - {2}{3}'.format(
-                    slug,
+                    pass
+                output += 'Vulnerability affecting Wordpress: {0} - {1}{2}'.format(
                     v['title'],
                     WPSCAN_URL,
                     v['id'])
@@ -62,9 +63,9 @@ def wp_check(version):
     return output
 
 
-if __name__ == '__main__':
-    r = requests.get(COMPOSER_FILE)
-    composer = json.loads(r.content)
+def check_wpscan(filename='composer.json'):
+    with open(filename, 'r') as f:
+        composer = json.loads(f.read())
 
     requirements = composer['require']
     wp_version = composer['extra']['wp-version']
@@ -86,5 +87,57 @@ if __name__ == '__main__':
 
     if not output:
         output = 'No active vulnerability found'
+
+    return output
+
+
+def check_composer(filename='composer.json'):
+    with open('composer-local.json', 'w') as f:
+        content = '{}'
+        f.write(content)
+
+    bashCommand = 'composer install'
+    subprocess.run(bashCommand.split())
+
+    with open('updates.json', 'w') as f:
+        bashCommand = 'composer outdated -D -f json'
+        subprocess.run(bashCommand.split(), stdout=f)
+
+    with open('updates.json', 'r') as f:
+        packages = json.loads(f.read())['installed']
+
+    output = ''
+    for package in packages:
+        output += '[{0}] {1}: {2} > {3}\n'.format(
+            package['latest-status'], package['name'],
+            package['version'], package['latest'])
+
+    if not output:
+        output = 'All packages are at latest version'
+
+    return output
+
+
+if __name__ == '__main__':
+    # Options
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--function',
+                        choices=['wpscan', 'composer'],
+                        help='Pick functionality',
+                        required=True)
+    args = parser.parse_args()
+
+    # Parsed options
+    function = args.function
+
+    r = requests.get(COMPOSER_FILE)
+    with open('composer.json', 'w') as f:
+        f.write(r.text)
+
+    if function == 'wpscan':
+        output = check_wpscan()
+
+    if function == 'composer':
+        output = check_composer()
 
     print(output)
