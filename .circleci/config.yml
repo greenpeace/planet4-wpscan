@@ -67,6 +67,11 @@ workflows:
 
   composer:
     jobs:
+      - check-wpscan:
+          context: org-global
+          filters:
+            branches:
+              only: composer
       - check-composer:
           context: org-global
           filters:
