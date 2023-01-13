@@ -65,6 +65,14 @@ workflows:
     jobs:
       - lint
 
+  composer:
+    jobs:
+      - check-composer:
+          context: org-global
+          filters:
+            branches:
+              only: composer
+
   cron-check:
     triggers:
       - schedule:
